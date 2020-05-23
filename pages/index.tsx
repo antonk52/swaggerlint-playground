@@ -1,10 +1,11 @@
 import React from 'react';
 import {Result} from 'types';
-import {Textarea} from 'components/Textarea';
 import {PrintResult} from 'components/PrintResult';
 import {ConfigDialog} from 'components/ConfigDialog';
 import {swaggerlint, SwaggerlintConfig} from 'swaggerlint';
+import {Editor} from 'components/Editor';
 import defaultConfig from 'swaggerlint/dist/defaultConfig';
+import {prettify} from 'utils';
 
 export default () => {
     const [swaggerRaw, setSwaggerRaw] = React.useState('');
@@ -34,11 +35,21 @@ export default () => {
             setIsValid(false);
             setResult(null);
         }
-    }
+    };
+
+    const onPrettify = () => {
+        setSwaggerRaw(
+            prettify(swaggerRaw)
+        );
+    };
+
     return (
         <div>
             <ConfigDialog config={config} onChange={onConfigChange} />
-            <Textarea value={swaggerRaw} onChange={onChange} />
+            <Editor value={swaggerRaw} onChange={onChange} />
+            <button onClick={onPrettify} disabled={!isValid}>
+                🍬
+            </button>
             {isValid ? '✅' : '❌'}
             <PrintResult result={result} />
         </div>
