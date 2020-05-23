@@ -4,3 +4,10 @@
 body {
     background: hotpink;
 }
+
+/**
+ * In order to overlay the codemirror's line numbers column
+ */
+.ReactModal__Overlay {
+    z-index: 4;
+}

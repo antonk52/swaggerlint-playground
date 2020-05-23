@@ -4,8 +4,7 @@ import {PrintResult} from 'components/PrintResult';
 import {ConfigDialog} from 'components/ConfigDialog';
 import {swaggerlint, SwaggerlintConfig} from 'swaggerlint';
 import {Editor} from 'components/Editor';
-import defaultConfig from 'swaggerlint/dist/defaultConfig';
-import {prettify} from 'utils';
+import {prettify, defaultConfig} from 'utils';
 
 export default () => {
     const [swaggerRaw, setSwaggerRaw] = React.useState('');
@@ -38,9 +37,7 @@ export default () => {
     };
 
     const onPrettify = () => {
-        setSwaggerRaw(
-            prettify(swaggerRaw)
-        );
+        setSwaggerRaw(prettify(swaggerRaw));
     };
 
     return (
