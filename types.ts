@@ -1,10 +1,13 @@
 import {LintError, SwaggerlintConfig} from 'swaggerlint';
-import codemirror from 'codemirror';
-
-export type Result = null | LintError[];
 
 export type Config = Required<SwaggerlintConfig> & {
     ignore: Required<SwaggerlintConfig["ignore"]>
 };
 
-export type Editor = codemirror.Editor;
+type Coord = {
+    col: number,
+    line: number,
+};
+export type LintErrorWithCoords = LintError & {start: Coord, end: Coord};
+
+export type Result = null | LintErrorWithCoords[];

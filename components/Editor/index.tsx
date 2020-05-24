@@ -1,33 +1,41 @@
 import React from 'react';
-import {Editor as EditorT} from 'types';
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
-import {Controlled} from 'react-codemirror2';
-if (typeof window !== 'undefined') {
-    require('codemirror/mode/javascript/javascript');
-    require('codemirror/mode/yaml/yaml');
+import {Ace} from 'ace-builds';
+
+import {LintErrorWithCoords} from 'types';
+
+function errToAnnotaion(lintError: LintErrorWithCoords): Ace.Annotation {
+    const {start, msg} = lintError;
+    return {
+        row: start.line - 1,
+        column: start.col,
+        type: 'error',
+        text: msg,
+    };
 }
 
 type Props = {
-    value: string,
-    onChange: (a: string) => void,
-    setEditor: (a: EditorT) => void,
+    value: string;
+    onChange: (a: string) => void;
+    errors: LintErrorWithCoords[];
 };
 
-export function Editor({value, onChange, setEditor}: Props) {
+export function Editor({value, onChange, errors}: Props) {
     return (
-        <div style={{maxWidth: '100vw'}}>
-            <Controlled
+        <div style={{maxWidth: '100vw', display: 'flex'}}>
+            <AceEditor
+                mode="json"
+                theme="tomorrow_night_eighties"
                 value={value}
-                options={{
-                    mode: {name: "javascript", json: true},
-                    theme: 'tomorrow-night-eighties',
-                    lineNumbers: true,
-                }}
-                onBeforeChange={(editor, __, value) => {
-                    onChange(value);
-                    setEditor(editor)
-                }}
+                onChange={onChange}
+                annotations={
+                    Array.isArray(errors) ? errors.map(errToAnnotaion) : []
+                }
+                // markers={}
             />
         </div>
-    )
+    );
 }
