@@ -1,10 +1,9 @@
 import React from 'react';
-import {Result} from 'types';
-import {LintError} from 'swaggerlint';
+import {Result, LintErrorWithCoords} from 'types';
 
-const ErrorItem = ({msg, name, location, onButtonClick}: LintError & {onButtonClick: () => void}) => (
+const ErrorItem = ({msg, name, location, onButtonClick, start}: LintErrorWithCoords & {onButtonClick: () => void}) => (
     <div>
-        <b>{name}</b>
+        <span><b>{name}</b> (found on line {start.line})</span>
         <br />
         <span>{msg}</span>
         <br />

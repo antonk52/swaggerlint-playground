@@ -7,18 +7,33 @@ import jsonToAst from 'json-to-ast';
 import {prettify, defaultConfig} from 'utils';
 import {Result, Config} from 'types';
 
-export default () => {
-    const [swaggerRaw, setSwaggerRaw] = React.useState('');
-    const [isValid, setIsValid] = React.useState(false);
-    const [result, setResult] = React.useState<Result>(null);
-    const [config, setConfig] = React.useState(defaultConfig);
-    const onValidChange = (parsed: object, raw: string): void => {
-        const errs = swaggerlint(parsed, config);
+type State = {
+    swaggerRaw: string;
+    isValid: boolean;
+    result: Result;
+    config: Config;
+};
+
+export default class SwaggerlintPlayground extends React.Component<{}, State> {
+    constructor(props: {}) {
+        super(props);
+
+        this.state = {
+            swaggerRaw: '',
+            isValid: false,
+            result: null,
+            config: defaultConfig,
+        };
+    }
+
+    onValidChange = (parsed: object, raw: string): void => {
+        const errs = swaggerlint(parsed, this.state.config);
         const ast = jsonToAst(raw, {loc: true});
-        const result: Result = errs.map(lintError => {
+        const result: Result = errs.map((lintError) => {
             const node = lintError.location.reduce((acc, key) => {
                 if (acc.type === 'Object') {
-                    return acc.children.find((el) => el.key.value === key)?.value;
+                    return acc.children.find((el) => el.key.value === key)
+                        ?.value;
                 }
 
                 if (acc.type === 'Array') {
@@ -41,50 +56,45 @@ export default () => {
                     line: loc.end.line,
                     col: loc.end.column,
                 },
-            }
+            };
 
             return Object.assign(lintError, coords);
-        })
+        });
 
-        requestAnimationFrame(() => setResult(result));
+        requestAnimationFrame(() =>
+            this.setState((state) => ({...state, result})),
+        );
     };
 
-    const onChange = (raw: string): void => {
-        setSwaggerRaw(raw);
-
+    onValidateAttempt = (raw: string, config: Config) => {
         try {
             const parsed = JSON.parse(raw);
-            setIsValid(true);
-            onValidChange(parsed, raw);
+            this.setState((oldState) => ({
+                ...oldState,
+                isValid: true,
+                swaggerRaw: raw,
+                config: config,
+            }));
+
+            this.onValidChange(parsed, raw);
         } catch (e) {
-            setIsValid(false);
-            setResult(null);
+            this.setState((oldState) => ({
+                ...oldState,
+                isValid: false,
+                result: null,
+                swaggerRaw: raw,
+                config: config,
+            }));
         }
     };
 
-    const onConfigChange = (config: Config): void => {
-        setConfig(config);
-        try {
-            const parsed = JSON.parse(swaggerRaw);
-            setIsValid(true);
-            onValidChange(parsed, swaggerRaw);
-        } catch (e) {
-            setIsValid(false);
-            setResult(null);
-        }
-    };
-
-    const onPrettify = () => {
-        onChange(prettify(swaggerRaw));
-    };
-
-    const onErrorClick = (location: string[]) => {
+    onErrorClick = (location: string[]) => {
         /**
          * + parse json to ast
          * + find location of the error cause
          * - highlight it in the editor
          */
-        const ast = jsonToAst(swaggerRaw, {loc: true});
+        const ast = jsonToAst(this.state.swaggerRaw, {loc: true});
         const node = location.reduce((acc, key) => {
             if (acc.type === 'Object') {
                 return acc.children.find((el) => el.key.value === key)?.value;
@@ -106,19 +116,40 @@ export default () => {
         node;
     };
 
-    return (
-        <div>
-            <ConfigDialog config={config} onChange={onConfigChange} />
-            <Editor
-                value={swaggerRaw}
-                onChange={onChange}
-                errors={result === null ? [] : result}
-            />
-            <button onClick={onPrettify} disabled={!isValid}>
-                🍬
-            </button>
-            {isValid ? '✅' : '❌'}
-            <PrintResult result={result} onErrorClick={onErrorClick} />
-        </div>
-    );
-};
+    onConfigChange = (config: Config): void => {
+        this.setState((oldState) => ({
+            ...oldState,
+            config,
+        }));
+        this.onValidateAttempt(this.state.swaggerRaw, config);
+    };
+
+    onChange = (raw: string): void => {
+        this.setState((oldState) => ({...oldState, swaggerRaw: raw}));
+
+        this.onValidateAttempt(raw, this.state.config);
+    };
+    onPrettify = () => {
+        this.onChange(prettify(this.state.swaggerRaw));
+    };
+
+    render() {
+        const {swaggerRaw, isValid, result, config} = this.state;
+
+        return (
+            <div>
+                <ConfigDialog config={config} onChange={this.onConfigChange} />
+                <Editor
+                    value={swaggerRaw}
+                    onChange={this.onChange}
+                    errors={result === null ? [] : result}
+                />
+                <button onClick={this.onPrettify} disabled={!isValid}>
+                    prettify
+                </button>
+                {isValid ? '✅' : '❌'}
+                <PrintResult result={result} onErrorClick={this.onErrorClick} />
+            </div>
+        );
+    }
+}
