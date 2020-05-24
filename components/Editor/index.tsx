@@ -2,6 +2,10 @@ import React from 'react';
 import {Editor as EditorT} from 'types';
 
 import {Controlled} from 'react-codemirror2';
+if (typeof window !== 'undefined') {
+    require('codemirror/mode/javascript/javascript');
+    require('codemirror/mode/yaml/yaml');
+}
 
 type Props = {
     value: string,
@@ -15,10 +19,9 @@ export function Editor({value, onChange, setEditor}: Props) {
             <Controlled
                 value={value}
                 options={{
-                    mode: 'json',
-                    theme: 'base16-dark',
+                    mode: {name: "javascript", json: true},
+                    theme: 'tomorrow-night-eighties',
                     lineNumbers: true,
-                    enableCodeFolding: true,
                 }}
                 onBeforeChange={(editor, __, value) => {
                     onChange(value);

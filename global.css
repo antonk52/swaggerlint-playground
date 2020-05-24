@@ -1,5 +1,5 @@
 @import "./node_modules/codemirror/lib/codemirror.css";
-@import "./node_modules/codemirror/theme/base16-dark.css";
+@import "./node_modules/codemirror/theme/tomorrow-night-eighties.css";
 
 body {
     background: hotpink;
