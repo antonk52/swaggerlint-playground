@@ -5,16 +5,19 @@ import {swaggerlint} from 'swaggerlint';
 import {Editor} from 'components/Editor';
 import jsonToAst from 'json-to-ast';
 import {prettify, defaultConfig} from 'utils';
-import {Result, Config} from 'types';
+import {Result, Config, Mark} from 'types';
+import AceEditor from 'react-ace';
 
 type State = {
     swaggerRaw: string;
     isValid: boolean;
     result: Result;
     config: Config;
+    currentMark: Mark;
 };
 
 export default class SwaggerlintPlayground extends React.Component<{}, State> {
+    editor: React.RefObject<AceEditor>;
     constructor(props: {}) {
         super(props);
 
@@ -23,7 +26,10 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
             isValid: false,
             result: null,
             config: defaultConfig,
+            currentMark: [],
         };
+
+        this.editor = React.createRef();
     }
 
     onValidChange = (parsed: object, raw: string): void => {
@@ -89,11 +95,8 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
     };
 
     onErrorClick = (location: string[]) => {
-        /**
-         * + parse json to ast
-         * + find location of the error cause
-         * - highlight it in the editor
-         */
+        if (!this.editor.current) return;
+
         const ast = jsonToAst(this.state.swaggerRaw, {loc: true});
         const node = location.reduce((acc, key) => {
             if (acc.type === 'Object') {
@@ -110,22 +113,48 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
             );
         }, ast);
 
-        /**
-         * TODO: scroll to the node position
-         */
-        node;
+        const loc = node.loc as jsonToAst.Location;
+
+        const desiredLine = loc.start.line - 5;
+        const targetLine = desiredLine > 0 ? desiredLine : loc.start.line;
+
+        this.editor.current.editor.scrollToLine(
+            targetLine,
+            false,
+            false, // TODO: what's up with the animations??
+            () => {},
+        );
+
+        this.setState((state) => ({
+            ...state,
+            currentMark: [
+                {
+                    startRow: loc.start.line - 1,
+                    startCol: loc.start.column - 1,
+                    endRow: loc.end.line - 1,
+                    endCol: loc.end.column - 1,
+                    className: 'highlighed-error-cause',
+                    type: 'text',
+                },
+            ],
+        }));
     };
 
     onConfigChange = (config: Config): void => {
         this.setState((oldState) => ({
             ...oldState,
             config,
+            currentMark: [],
         }));
         this.onValidateAttempt(this.state.swaggerRaw, config);
     };
 
     onChange = (raw: string): void => {
-        this.setState((oldState) => ({...oldState, swaggerRaw: raw}));
+        this.setState((oldState) => ({
+            ...oldState,
+            swaggerRaw: raw,
+            currentMark: [],
+        }));
 
         this.onValidateAttempt(raw, this.state.config);
     };
@@ -134,7 +163,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
     };
 
     render() {
-        const {swaggerRaw, isValid, result, config} = this.state;
+        const {swaggerRaw, isValid, result, config, currentMark} = this.state;
 
         return (
             <div>
@@ -143,6 +172,8 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                     value={swaggerRaw}
                     onChange={this.onChange}
                     errors={result === null ? [] : result}
+                    $ref={this.editor}
+                    mark={currentMark}
                 />
                 <button onClick={this.onPrettify} disabled={!isValid}>
                     prettify

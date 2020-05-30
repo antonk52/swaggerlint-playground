@@ -5,7 +5,7 @@ import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
 import {Ace} from 'ace-builds';
 
-import {LintErrorWithCoords} from 'types';
+import {LintErrorWithCoords, Mark} from 'types';
 
 function errToAnnotaion(lintError: LintErrorWithCoords): Ace.Annotation {
     const {start, msg} = lintError;
@@ -21,9 +21,11 @@ type Props = {
     value: string;
     onChange: (a: string) => void;
     errors: LintErrorWithCoords[];
+    $ref: React.Ref<AceEditor>;
+    mark: Mark;
 };
 
-export function Editor({value, onChange, errors}: Props) {
+export function Editor({value, onChange, errors, mark, $ref}: Props) {
     return (
         <div style={{maxWidth: '100vw', display: 'flex'}}>
             <AceEditor
@@ -34,7 +36,8 @@ export function Editor({value, onChange, errors}: Props) {
                 annotations={
                     Array.isArray(errors) ? errors.map(errToAnnotaion) : []
                 }
-                // markers={}
+                ref={$ref}
+                markers={mark}
             />
         </div>
     );

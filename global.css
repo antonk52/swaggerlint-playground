@@ -2,9 +2,7 @@ body {
     background: hotpink;
 }
 
-/**
- * In order to overlay the codemirror's line numbers column
- */
-.ReactModal__Overlay {
-    z-index: 4;
+.highlighed-error-cause {
+    background: rgba(255, 0, 0, .2);
+    position: absolute;
 }
