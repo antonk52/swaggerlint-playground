@@ -1,11 +1,12 @@
 import React from 'react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
 import {Ace} from 'ace-builds';
 
-import {LintErrorWithCoords, Mark} from 'types';
+import {LintErrorWithCoords, Mark, Format} from 'types';
 
 function errToAnnotaion(lintError: LintErrorWithCoords): Ace.Annotation {
     const {start, msg} = lintError;
@@ -23,13 +24,14 @@ type Props = {
     errors: LintErrorWithCoords[];
     $ref: React.Ref<AceEditor>;
     mark: Mark;
+    format: Format;
 };
 
-export function Editor({value, onChange, errors, mark, $ref}: Props) {
+export function Editor({value, onChange, errors, mark, $ref, format}: Props) {
     return (
         <div style={{maxWidth: '100vw', display: 'flex'}}>
             <AceEditor
-                mode="json"
+                mode={format}
                 theme="tomorrow_night_eighties"
                 value={value}
                 onChange={onChange}

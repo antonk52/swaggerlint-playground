@@ -1,6 +1,8 @@
 import {LintError, SwaggerlintConfig} from 'swaggerlint';
 import {IMarker} from 'react-ace';
 
+export type Format = 'json' | 'yaml';
+
 export type Config = Required<SwaggerlintConfig> & {
     ignore: Required<SwaggerlintConfig["ignore"]>
 };
