@@ -8,7 +8,6 @@ import {prettify, defaultConfig} from 'utils';
 import {Result, Config, Mark, Format} from 'types';
 import AceEditor from 'react-ace';
 import yaml from 'js-yaml';
-// @ts-expect-error
 import yamlToAst, {loc as locSymbol} from 'pseudo-yaml-ast';
 
 type State = {
