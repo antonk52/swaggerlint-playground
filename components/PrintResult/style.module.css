@@ -1,0 +1,15 @@
+.resultWrapper {
+    grid-area: result;
+    overflow: scroll;
+}
+
+.total {
+    padding: 0 16px;
+    fontsize: 1.4em;
+}
+
+.list {
+    liststyle: none;
+    margin: 0;
+    padding: 0;
+}

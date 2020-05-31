@@ -1,6 +1,7 @@
 import React from 'react';
 import {PrintResult} from 'components/PrintResult';
 import {ConfigDialog} from 'components/ConfigDialog';
+import {Header} from 'components/Header';
 import {swaggerlint} from 'swaggerlint';
 import {Editor} from 'components/Editor';
 import jsonToAst from 'json-to-ast';
@@ -8,7 +9,7 @@ import {prettify, defaultConfig} from 'utils';
 import {Result, Config, Mark, Format} from 'types';
 import AceEditor from 'react-ace';
 import yaml from 'js-yaml';
-import yamlToAst, {loc as locSymbol} from 'pseudo-yaml-ast';
+import yamlToJsonWithLocations, {loc as locSymbol} from 'pseudo-yaml-ast';
 
 type State = {
     swaggerRaw: string;
@@ -76,13 +77,13 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 this.setState((state) => ({...state, result})),
             );
         } else {
-            const ast = yamlToAst(raw);
+            const jsonWithLocations = yamlToJsonWithLocations(raw);
             const result: Result = errs.map((lintError) => {
                 const {location} = lintError;
 
                 const coords = location.reduce((acc, key) => {
                     return acc[key];
-                }, ast)[locSymbol];
+                }, jsonWithLocations)[locSymbol];
                 return Object.assign(lintError, {
                     start: {
                         line: coords.start.line,
@@ -188,8 +189,13 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 endCol: loc.end.column - 1,
             });
         } else {
-            const ast = yamlToAst(this.state.swaggerRaw);
-            const node = location.reduce((acc, key) => acc[key], ast);
+            const jsonWithLocations = yamlToJsonWithLocations(
+                this.state.swaggerRaw,
+            );
+            const node = location.reduce(
+                (acc, key) => acc[key],
+                jsonWithLocations,
+            );
 
             const loc = node[locSymbol];
 
@@ -210,16 +216,30 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
             () => {},
         );
 
-        this.setState((state) => ({
-            ...state,
-            currentMark: [
-                {
-                    ...coords,
-                    className: 'highlighed-error-cause',
-                    type: 'text',
-                },
-            ],
-        }));
+        /**
+         * This may seem rather odd
+         * We need to forcefully previous marks, for the dom nodes to be removed
+         * before adding new ones in order to have the `fadein` animation effect
+         */
+        this.setState(
+            (state) => ({
+                ...state,
+                currentMark: [],
+            }),
+            () =>
+                requestAnimationFrame(() =>
+                    this.setState((state) => ({
+                        ...state,
+                        currentMark: [
+                            {
+                                ...coords,
+                                className: 'highlighed-error-cause',
+                                type: 'text',
+                            },
+                        ],
+                    })),
+                ),
+        );
     };
 
     onConfigChange = (config: Config): void => {
@@ -259,8 +279,13 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         } = this.state;
 
         return (
-            <div>
-                <ConfigDialog config={config} onChange={this.onConfigChange} />
+            <div className="playground-wrapper">
+                <Header>
+                    <ConfigDialog
+                        config={config}
+                        onChange={this.onConfigChange}
+                    />
+                </Header>
                 <Editor
                     value={swaggerRaw}
                     onChange={this.onChange}

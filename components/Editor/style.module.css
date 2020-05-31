@@ -1,0 +1,7 @@
+.editorWrapper {
+    grid-area: editor;
+    /**
+     * to simulate editor outline before js has loaded and initiated
+     */
+    background: #2d2d2d;
+}

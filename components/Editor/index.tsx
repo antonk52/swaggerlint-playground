@@ -4,6 +4,8 @@ import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
+import css from './style.module.css';
+
 import {Ace} from 'ace-builds';
 
 import {LintErrorWithCoords, Mark, Format} from 'types';
@@ -29,8 +31,10 @@ type Props = {
 
 export function Editor({value, onChange, errors, mark, $ref, format}: Props) {
     return (
-        <div style={{maxWidth: '100vw', display: 'flex'}}>
+        <div className={css.editorWrapper}>
             <AceEditor
+                width="100%"
+                height="100%"
                 mode={format}
                 theme="tomorrow_night_eighties"
                 value={value}
