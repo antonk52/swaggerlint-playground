@@ -1,6 +1,6 @@
 .header {
     grid-area: header;
-    padding: 0.7em;
+    padding: 12px 20px;
 
     display: flex;
     justify-content: space-between;
@@ -10,4 +10,20 @@
 
     position: relative;
     z-index: 4;
+}
+
+.star {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: baseline;
+}
+
+.name {
+    margin: 0;
+}
+
+.version {
+    font-size: 12px;
+    color: #999;
+    margin-left: 1ch;
 }
