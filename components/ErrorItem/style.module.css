@@ -37,13 +37,12 @@
     background: none;
     border: 2px solid #49cc90;
     border-radius: 4px;
-    box-shadow: 0 0 5px rgba(0,0,0,0);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0);
 
-    transition: all .3s;
+    transition: all 0.3s;
 }
 
 .btn:hover {
     cursor: pointer;
-    box-shadow: 0 0 5px rgba(0,0,0,.3);
-
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
