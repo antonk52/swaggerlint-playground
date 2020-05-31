@@ -31,8 +31,9 @@
     opacity: 0.5;
     /**
      * hides the button underneath the header
+     * -120% since the funky behavior in safari
      */
-    transform: translateY(calc(-100% - 4px));
+    transform: translateY(calc(-120% - 4px));
 }
 
 .prettify:hover {

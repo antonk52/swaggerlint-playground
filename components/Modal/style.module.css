@@ -1,6 +1,9 @@
 .overlay {
     position: fixed;
-    inset: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: space-around;
@@ -10,7 +13,7 @@
     /**
      * To overlay ace editor line number column
      */
-    z-index: 4;
+    z-index: 10;
 }
 
 .content {
@@ -33,14 +36,12 @@
     top: 0;
     right: 0;
 
-    display: block;
-    padding: 8px;
     border: 2px solid #49cc90;
     border-radius: 50%;
     width: 30px;
     height: 30px;
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
     background: rgba(73, 204, 144, 0);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0);
