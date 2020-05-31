@@ -8,7 +8,7 @@ type Props = {
 export const Textarea = ({value, onChange}: Props) => (
     <textarea
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         style={{minHeight: '400px', minWidth: '70vw'}}
     />
 );
