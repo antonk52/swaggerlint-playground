@@ -1,0 +1,61 @@
+.overlay {
+    position: fixed;
+    inset: 0px;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 52px;
+
+    /**
+     * To overlay ace editor line number column
+     */
+    z-index: 4;
+}
+
+.content {
+    border: 0;
+    background: #eee;
+    overflow: auto;
+    border-radius: 4px;
+    outline: currentcolor none medium;
+    padding: 8px 12px;
+    max-height: 100%;
+}
+
+.inner {
+    position: relative;
+    padding: 12px;
+}
+
+.button {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    display: block;
+    padding: 8px;
+    border: 2px solid #49cc90;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(73, 204, 144, 0);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0);
+    transition: background 0.3s, box-shadow 0.3s;
+    font-weight: bold;
+}
+
+.button:hover {
+    background: rgba(73, 204, 144, 1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+@media screen and (max-width: 700px) {
+    .overlay {
+        padding: 24px;
+    }
+}

@@ -3,3 +3,7 @@ declare module 'pseudo-yaml-ast' {
     export const loc: Symbol<'pseudo-yaml-ast-loc'>
     export default yamlToAst
 }
+declare module '*.css' {
+    declare const css: {[key: string]: string};
+    export default css
+}
