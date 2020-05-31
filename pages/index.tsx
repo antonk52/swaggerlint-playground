@@ -287,18 +287,15 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                     />
                 </Header>
                 <Editor
-                    value={swaggerRaw}
-                    onChange={this.onChange}
-                    errors={result === null ? [] : result}
                     $ref={this.editor}
-                    mark={currentMark}
+                    errors={result === null ? [] : result}
                     format={format}
+                    isValid={isValid}
+                    mark={currentMark}
+                    onChange={this.onChange}
+                    onPrettify={this.onPrettify}
+                    value={swaggerRaw}
                 />
-                <button onClick={this.onPrettify} disabled={!isValid}>
-                    prettify
-                </button>
-                {isValid ? '✅' : '❌'}
-                <p>format: "{this.state.format}"</p>
                 <PrintResult result={result} onErrorClick={this.onErrorClick} />
             </div>
         );

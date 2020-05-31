@@ -21,17 +21,35 @@ function errToAnnotaion(lintError: LintErrorWithCoords): Ace.Annotation {
 }
 
 type Props = {
-    value: string;
-    onChange: (a: string) => void;
-    errors: LintErrorWithCoords[];
     $ref: React.Ref<AceEditor>;
-    mark: Mark;
+    errors: LintErrorWithCoords[];
     format: Format;
+    isValid: boolean;
+    mark: Mark;
+    onChange: (a: string) => void;
+    onPrettify: () => void;
+    value: string;
 };
 
-export function Editor({value, onChange, errors, mark, $ref, format}: Props) {
+export function Editor({
+    $ref,
+    errors,
+    format,
+    isValid,
+    mark,
+    onChange,
+    onPrettify,
+    value,
+}: Props) {
     return (
         <div className={css.editorWrapper}>
+            <button
+                onClick={onPrettify}
+                disabled={!isValid}
+                className={css.prettify}
+            >
+                prettify
+            </button>
             <AceEditor
                 width="100%"
                 height="100%"

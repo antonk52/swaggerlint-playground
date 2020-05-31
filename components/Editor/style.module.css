@@ -1,7 +1,40 @@
 .editorWrapper {
     grid-area: editor;
+    position: relative;
+
     /**
      * to simulate editor outline before js has loaded and initiated
      */
     background: #2d2d2d;
+}
+
+.prettify {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 3;
+
+    display: block;
+    padding: 2px 6px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 0;
+    background: #eee;
+    color: #333;
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.prettify[disabled] {
+    color: #888;
+    opacity: 0.5;
+    /**
+     * hides the button underneath the header
+     */
+    transform: translateY(calc(-100% - 4px));
+}
+
+.prettify:hover {
+    cursor: pointer;
 }
