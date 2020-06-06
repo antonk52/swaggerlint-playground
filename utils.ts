@@ -20,3 +20,5 @@ export const defaultConfig: Config = {
         definitions: [],
     },
 };
+
+export const isBrowser = typeof window !== 'undefined';

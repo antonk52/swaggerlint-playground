@@ -1,13 +1,11 @@
 import React from 'react';
 import ReactModal from 'react-modal';
 
+import {isBrowser} from 'utils';
 import css from './style.module.css';
 
 // @ts-expect-error
-const app: HtmlElement | void =
-    typeof window === 'undefined'
-        ? undefined
-        : document.querySelector('#__next');
+const app: HtmlElement | false = isBrowser && document.querySelector('#__next');
 
 type Props = {
     children: React.ReactNode;
