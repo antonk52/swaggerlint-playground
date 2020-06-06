@@ -4,6 +4,8 @@ import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
+import Dropzone, {FileRejection} from 'react-dropzone';
+
 import css from './style.module.css';
 
 import {Ace} from 'ace-builds';
@@ -18,6 +20,19 @@ function errToAnnotaion(lintError: LintErrorWithCoords): Ace.Annotation {
         type: 'error',
         text: msg,
     };
+}
+
+function DragOverlay({isVisible}: {isVisible: boolean}) {
+    return (
+        <div
+            className={css.dragOverlay}
+            style={{
+                display: isVisible ? 'flex' : 'none',
+            }}
+        >
+            <span>Drop your schema here (json/yaml)</span>
+        </div>
+    );
 }
 
 type Props = {
@@ -41,6 +56,22 @@ export function Editor({
     onPrettify,
     value,
 }: Props) {
+    const onDrop = ([file]: File[]): void => {
+        if (!file)
+            return alert(
+                'Please add a single file with your Swagger schema. Only JSON and YAML formats are supported',
+            );
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            const spec = reader.result;
+
+            onChange(String(spec));
+        };
+
+        reader.readAsText(file, 'utf-8');
+    };
+
     return (
         <div className={css.editorWrapper}>
             <button
@@ -50,19 +81,37 @@ export function Editor({
             >
                 prettify
             </button>
-            <AceEditor
-                width="100%"
-                height="100%"
-                mode={format}
-                theme="tomorrow_night_eighties"
-                value={value}
-                onChange={onChange}
-                annotations={
-                    Array.isArray(errors) ? errors.map(errToAnnotaion) : []
-                }
-                ref={$ref}
-                markers={mark}
-            />
+            <Dropzone
+                onDrop={onDrop}
+                multiple={false}
+                noClick
+                accept={['application/json', '.yaml', '.yml']}
+            >
+                {({getRootProps, getInputProps, isDragActive}) => (
+                    <div {...getRootProps()} className={css.dropzone}>
+                        <input {...getInputProps()} />
+
+                        <DragOverlay isVisible={isDragActive} />
+
+                        <AceEditor
+                            placeholder="Paste or drop a file with your schema here"
+                            width="100%"
+                            height="100%"
+                            mode={format}
+                            theme="tomorrow_night_eighties"
+                            value={value}
+                            onChange={onChange}
+                            annotations={
+                                Array.isArray(errors)
+                                    ? errors.map(errToAnnotaion)
+                                    : []
+                            }
+                            ref={$ref}
+                            markers={mark}
+                        />
+                    </div>
+                )}
+            </Dropzone>
         </div>
     );
 }

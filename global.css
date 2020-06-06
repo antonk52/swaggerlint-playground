@@ -37,3 +37,9 @@ body {
         background: rgba(255, 0, 0, 0.2);
     }
 }
+
+.ace_placeholder {
+    transform: none;
+    margin: 0;
+    font: 12px / 16px monospace;
+}

@@ -39,3 +39,23 @@
 .prettify:hover {
     cursor: pointer;
 }
+
+.dropzone {
+    height: 100%;
+    width: 100%;
+    background: #555;
+    position: relative;
+}
+
+.dragOverlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.5);
+    zindex: 1000000;
+    color: #eee;
+    justify-content: space-around;
+    align-items: center;
+}
