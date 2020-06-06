@@ -65,3 +65,9 @@
 .dropzoneOverlayed:after {
     display: flex;
 }
+
+.editorLabel {
+    position: absolute;
+    left: -200vw;
+    color: #fff;
+}

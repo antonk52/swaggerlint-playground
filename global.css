@@ -41,5 +41,13 @@ body {
 .ace_placeholder {
     transform: none;
     margin: 0;
-    font: 12px / 16px monospace;
+    font: 13px / 16px monospace;
+}
+
+/**
+ * Ugly & non intuitive way to increase the selector specificity
+ * in order to set the color for the placeholder text
+ */
+.ace_placeholder.ace_placeholder {
+    color: #dcdcdc;
 }

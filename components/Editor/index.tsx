@@ -84,22 +84,27 @@ export function Editor({
                     </button>
                     <input {...getInputProps()} />
 
-                    <AceEditor
-                        placeholder="Paste or drop a file with your schema here"
-                        width="100%"
-                        height="100%"
-                        mode={format}
-                        theme="tomorrow_night_eighties"
-                        value={value}
-                        onChange={onChange}
-                        annotations={
-                            Array.isArray(errors)
-                                ? errors.map(errToAnnotaion)
-                                : []
-                        }
-                        ref={$ref}
-                        markers={mark}
-                    />
+                    <label>
+                        <span className={css.editorLabel}>
+                            Swaggerlint playground editor
+                        </span>
+                        <AceEditor
+                            placeholder="Paste or drop a file with your schema here"
+                            width="100%"
+                            height="100%"
+                            mode={format}
+                            theme="tomorrow_night_eighties"
+                            value={value}
+                            onChange={onChange}
+                            annotations={
+                                Array.isArray(errors)
+                                    ? errors.map(errToAnnotaion)
+                                    : []
+                            }
+                            ref={$ref}
+                            markers={mark}
+                        />
+                    </label>
                 </div>
             )}
         </Dropzone>
