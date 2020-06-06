@@ -1,6 +1,8 @@
 import React from 'react';
 import {Config} from 'types';
 import {Modal} from './Modal';
+import {isBrowser} from 'utils';
+import copy from 'copy-to-clipboard';
 
 type Props = {
     config: Config;
@@ -28,6 +30,10 @@ function IgnoreInput({
     );
 }
 
+function stringifyConfig({extends: _, ...config}: Config) {
+    return JSON.stringify(config);
+}
+
 function copyConf(config: Config): Config {
     return {
         ...config,
@@ -50,6 +56,14 @@ export const ConfigDialog = ({config, onChange}: Props) => {
                 [target.name]: target.checked,
             },
         });
+    };
+
+    const clipboardConfig = () => {
+        if (!isBrowser) return;
+        console.log('trying to copy i guess');
+        const jsonConfig = stringifyConfig(config);
+
+        copy(jsonConfig);
     };
 
     return (
@@ -145,6 +159,9 @@ export const ConfigDialog = ({config, onChange}: Props) => {
                         ))}
                     </ul>
                 </form>
+                <button type="button" onClick={clipboardConfig}>
+                    Copy as JSON
+                </button>
             </Modal>
         </React.Fragment>
     );

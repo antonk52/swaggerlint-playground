@@ -37,3 +37,17 @@ body {
         background: rgba(255, 0, 0, 0.2);
     }
 }
+
+.ace_placeholder {
+    transform: none;
+    margin: 0;
+    font: 13px / 16px monospace;
+}
+
+/**
+ * Ugly & non intuitive way to increase the selector specificity
+ * in order to set the color for the placeholder text
+ */
+.ace_placeholder.ace_placeholder {
+    color: #dcdcdc;
+}

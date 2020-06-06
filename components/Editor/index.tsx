@@ -4,6 +4,8 @@ import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
+import Dropzone from 'react-dropzone';
+
 import css from './style.module.css';
 
 import {Ace} from 'ace-builds';
@@ -41,28 +43,70 @@ export function Editor({
     onPrettify,
     value,
 }: Props) {
+    const onDrop = ([file]: File[]): void => {
+        if (!file)
+            return alert(
+                'Please add a single file with your Swagger schema. Only JSON and YAML formats are supported',
+            );
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            const spec = reader.result;
+
+            onChange(String(spec));
+        };
+
+        reader.readAsText(file, 'utf-8');
+    };
+
     return (
-        <div className={css.editorWrapper}>
-            <button
-                onClick={onPrettify}
-                disabled={!isValid}
-                className={css.prettify}
-            >
-                prettify
-            </button>
-            <AceEditor
-                width="100%"
-                height="100%"
-                mode={format}
-                theme="tomorrow_night_eighties"
-                value={value}
-                onChange={onChange}
-                annotations={
-                    Array.isArray(errors) ? errors.map(errToAnnotaion) : []
-                }
-                ref={$ref}
-                markers={mark}
-            />
-        </div>
+        <Dropzone
+            onDrop={onDrop}
+            multiple={false}
+            noClick
+            accept={['application/json', '.yaml', '.yml']}
+        >
+            {({getRootProps, getInputProps, isDragActive}) => (
+                <div
+                    {...getRootProps()}
+                    className={[
+                        css.editorWrapper,
+                        css.dropzone,
+                        isDragActive ? css.dropzoneOverlayed : '',
+                    ].join(' ')}
+                >
+                    <button
+                        onClick={onPrettify}
+                        disabled={!isValid}
+                        className={css.prettify}
+                    >
+                        prettify
+                    </button>
+                    <input {...getInputProps()} />
+
+                    <label>
+                        <span className={css.editorLabel}>
+                            Swaggerlint playground editor
+                        </span>
+                        <AceEditor
+                            placeholder="Paste or drop a file with your schema here"
+                            width="100%"
+                            height="100%"
+                            mode={format}
+                            theme="tomorrow_night_eighties"
+                            value={value}
+                            onChange={onChange}
+                            annotations={
+                                Array.isArray(errors)
+                                    ? errors.map(errToAnnotaion)
+                                    : []
+                            }
+                            ref={$ref}
+                            markers={mark}
+                        />
+                    </label>
+                </div>
+            )}
+        </Dropzone>
     );
 }
