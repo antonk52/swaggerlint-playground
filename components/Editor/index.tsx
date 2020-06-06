@@ -4,7 +4,7 @@ import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
-import Dropzone, {FileRejection} from 'react-dropzone';
+import Dropzone from 'react-dropzone';
 
 import css from './style.module.css';
 
@@ -20,19 +20,6 @@ function errToAnnotaion(lintError: LintErrorWithCoords): Ace.Annotation {
         type: 'error',
         text: msg,
     };
-}
-
-function DragOverlay({isVisible}: {isVisible: boolean}) {
-    return (
-        <div
-            className={css.dragOverlay}
-            style={{
-                display: isVisible ? 'flex' : 'none',
-            }}
-        >
-            <span>Drop your schema here (json/yaml)</span>
-        </div>
-    );
 }
 
 type Props = {
@@ -73,45 +60,48 @@ export function Editor({
     };
 
     return (
-        <div className={css.editorWrapper}>
-            <button
-                onClick={onPrettify}
-                disabled={!isValid}
-                className={css.prettify}
-            >
-                prettify
-            </button>
-            <Dropzone
-                onDrop={onDrop}
-                multiple={false}
-                noClick
-                accept={['application/json', '.yaml', '.yml']}
-            >
-                {({getRootProps, getInputProps, isDragActive}) => (
-                    <div {...getRootProps()} className={css.dropzone}>
-                        <input {...getInputProps()} />
+        <Dropzone
+            onDrop={onDrop}
+            multiple={false}
+            noClick
+            accept={['application/json', '.yaml', '.yml']}
+        >
+            {({getRootProps, getInputProps, isDragActive}) => (
+                <div
+                    {...getRootProps()}
+                    className={[
+                        css.editorWrapper,
+                        css.dropzone,
+                        isDragActive ? css.dropzoneOverlayed : '',
+                    ].join(' ')}
+                >
+                    <button
+                        onClick={onPrettify}
+                        disabled={!isValid}
+                        className={css.prettify}
+                    >
+                        prettify
+                    </button>
+                    <input {...getInputProps()} />
 
-                        <DragOverlay isVisible={isDragActive} />
-
-                        <AceEditor
-                            placeholder="Paste or drop a file with your schema here"
-                            width="100%"
-                            height="100%"
-                            mode={format}
-                            theme="tomorrow_night_eighties"
-                            value={value}
-                            onChange={onChange}
-                            annotations={
-                                Array.isArray(errors)
-                                    ? errors.map(errToAnnotaion)
-                                    : []
-                            }
-                            ref={$ref}
-                            markers={mark}
-                        />
-                    </div>
-                )}
-            </Dropzone>
-        </div>
+                    <AceEditor
+                        placeholder="Paste or drop a file with your schema here"
+                        width="100%"
+                        height="100%"
+                        mode={format}
+                        theme="tomorrow_night_eighties"
+                        value={value}
+                        onChange={onChange}
+                        annotations={
+                            Array.isArray(errors)
+                                ? errors.map(errToAnnotaion)
+                                : []
+                        }
+                        ref={$ref}
+                        markers={mark}
+                    />
+                </div>
+            )}
+        </Dropzone>
     );
 }

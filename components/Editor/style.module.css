@@ -47,15 +47,21 @@
     position: relative;
 }
 
-.dragOverlay {
+.dropzone:after {
+    content: 'Drop your schema here (json/yaml)';
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
     background: rgba(0, 0, 0, 0.5);
-    zindex: 1000000;
+    z-index: 1000000;
     color: #eee;
     justify-content: space-around;
     align-items: center;
+
+    display: none;
+}
+.dropzoneOverlayed:after {
+    display: flex;
 }
