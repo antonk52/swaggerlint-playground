@@ -5,7 +5,7 @@ import {Header} from 'components/Header';
 import {swaggerlint} from 'swaggerlint';
 import {Editor} from 'components/Editor';
 import jsonToAst from 'json-to-ast';
-import {prettify, defaultConfig} from 'utils';
+import {prettify, defaultConfig, KEY_POINTING_ERRORS} from 'utils';
 import {Result, Config, Mark, Format, Coord} from 'types';
 import AceEditor from 'react-ace';
 import yaml from 'js-yaml';
@@ -19,20 +19,6 @@ type State = {
     currentMark: Mark;
     format: Format;
 };
-
-/**
- * a set of rules which have the last element in their location
- * pointing at the object property name, not the value
- */
-const KEY_ERR_RULE_NAMES = new Set([
-    'latin-definitions-only',
-    'no-trailing-slash',
-    'object-prop-casing',
-]);
-
-function isKeyPoiningLocation(name: string, length: number, index: number) {
-    return KEY_ERR_RULE_NAMES.has(name) && index === length - 1;
-}
 
 export default class SwaggerlintPlayground extends React.Component<{}, State> {
     editor: React.RefObject<AceEditor>;
@@ -58,13 +44,11 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
             const result: Result = errs.map((lintError) => {
                 const node = lintError.location.reduce((acc, key, index) => {
                     if (acc.type === 'Object') {
-                        const propName = isKeyPoiningLocation(
-                            lintError.name,
-                            lintError.location.length,
-                            index,
-                        )
-                            ? 'key'
-                            : 'value';
+                        const isLast = index === lintError.location.length - 1;
+                        const propName =
+                            isLast && KEY_POINTING_ERRORS.has(lintError.name)
+                                ? 'key'
+                                : 'value';
                         return acc.children.find(
                             (el) => el.key.value === key,
                         )?.[propName];
@@ -81,7 +65,9 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 }, ast);
 
                 const loc = node.loc as jsonToAst.Location;
-                const coords = {
+
+                return {
+                    ...lintError,
                     start: {
                         line: loc.start.line,
                         col: loc.start.column,
@@ -91,8 +77,6 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                         col: loc.end.column,
                     },
                 };
-
-                return Object.assign(lintError, coords);
             });
 
             requestAnimationFrame(() =>
@@ -101,21 +85,22 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         } else {
             const jsonWithLocations = yamlToJsonWithLocations(raw);
             const result: Result = errs.map((lintError) => {
-                const {location} = lintError;
+                const {start, end} = lintError.location.reduce(
+                    (acc, key) => acc[key],
+                    jsonWithLocations,
+                )[locSymbol];
 
-                const coords = location.reduce((acc, key) => {
-                    return acc[key];
-                }, jsonWithLocations)[locSymbol];
-                return Object.assign(lintError, {
+                return {
+                    ...lintError,
                     start: {
-                        line: coords.start.line,
-                        col: coords.start.column,
+                        line: start.line,
+                        col: start.column,
                     },
                     end: {
-                        line: coords.end.line,
-                        col: coords.end.column,
+                        line: end.line,
+                        col: end.column,
                     },
-                });
+                };
             });
 
             requestAnimationFrame(() =>

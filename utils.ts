@@ -22,3 +22,13 @@ export const defaultConfig: Config = {
 };
 
 export const isBrowser = typeof window !== 'undefined';
+
+/**
+ * a set of rules which have the last element in their location
+ * pointing at the object property name, not the value
+ */
+export const KEY_POINTING_ERRORS = new Set([
+    'latin-definitions-only',
+    'no-trailing-slash',
+    'object-prop-casing',
+]);
