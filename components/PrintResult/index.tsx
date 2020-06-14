@@ -12,7 +12,7 @@ export const PrintResult = ({
     onErrorClick,
 }: {
     result: Result;
-    onErrorClick: (arg: string[]) => void;
+    onErrorClick: (loc: string[], name: string) => void;
 }) => {
     if (result === null) {
         return <ResultWrapper />;
@@ -34,7 +34,9 @@ export const PrintResult = ({
                     <ErrorItem
                         key={i}
                         {...item}
-                        onButtonClick={() => onErrorClick(item.location)}
+                        onButtonClick={() =>
+                            onErrorClick(item.location, item.name)
+                        }
                     />
                 ))}
             </ul>

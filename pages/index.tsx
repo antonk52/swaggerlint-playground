@@ -20,6 +20,20 @@ type State = {
     format: Format;
 };
 
+/**
+ * a set of rules which have the last element in their location
+ * pointing at the object property name, not the value
+ */
+const KEY_ERR_RULE_NAMES = new Set([
+    'latin-definitions-only',
+    'no-trailing-slash',
+    'object-prop-casing',
+]);
+
+function isKeyPoiningLocation(name: string, length: number, index: number) {
+    return KEY_ERR_RULE_NAMES.has(name) && index === length - 1;
+}
+
 export default class SwaggerlintPlayground extends React.Component<{}, State> {
     editor: React.RefObject<AceEditor>;
     constructor(props: {}) {
@@ -42,10 +56,18 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         if (this.state.format === 'json') {
             const ast = jsonToAst(raw, {loc: true});
             const result: Result = errs.map((lintError) => {
-                const node = lintError.location.reduce((acc, key) => {
+                const node = lintError.location.reduce((acc, key, index) => {
                     if (acc.type === 'Object') {
-                        return acc.children.find((el) => el.key.value === key)
-                            ?.value;
+                        const propName = isKeyPoiningLocation(
+                            lintError.name,
+                            lintError.location.length,
+                            index,
+                        )
+                            ? 'key'
+                            : 'value';
+                        return acc.children.find(
+                            (el) => el.key.value === key,
+                        )?.[propName];
                     }
 
                     if (acc.type === 'Array') {
@@ -148,7 +170,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         }
     };
 
-    onErrorClick = (location: string[]) => {
+    onErrorClick = (location: string[], ruleName: string) => {
         if (!this.editor.current) return;
 
         let targetLine = 0;
@@ -161,10 +183,18 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
 
         if (this.state.format === 'json') {
             const ast = jsonToAst(this.state.swaggerRaw, {loc: true});
-            const node = location.reduce((acc, key) => {
+            const node = location.reduce((acc, key, index) => {
                 if (acc.type === 'Object') {
-                    return acc.children.find((el) => el.key.value === key)
-                        ?.value;
+                    const propName = isKeyPoiningLocation(
+                        ruleName,
+                        location.length,
+                        index,
+                    )
+                        ? 'key'
+                        : 'value';
+                    return acc.children.find((el) => el.key.value === key)?.[
+                        propName
+                    ];
                 }
 
                 if (acc.type === 'Array') {
