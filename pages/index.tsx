@@ -8,8 +8,12 @@ import jsonToAst from 'json-to-ast';
 import {prettify, defaultConfig, KEY_POINTING_ERRORS} from 'utils';
 import {Result, Config, Mark, Format, Coord} from 'types';
 import AceEditor from 'react-ace';
-import yaml from 'js-yaml';
-import yamlToJsonWithLocations, {loc as locSymbol} from 'pseudo-yaml-ast';
+import {safeLoad as yamlParser} from 'js-yaml';
+import {
+    safeLoad as yamlAstParser,
+    YAMLNode,
+    YAMLSequence,
+} from 'yaml-ast-parser';
 
 type State = {
     swaggerRaw: string;
@@ -19,6 +23,10 @@ type State = {
     currentMark: Mark;
     format: Format;
 };
+
+function isYamlSequence(node: YAMLNode): node is YAMLSequence {
+    return 'items' in node;
+}
 
 export default class SwaggerlintPlayground extends React.Component<{}, State> {
     editor: React.RefObject<AceEditor>;
@@ -83,22 +91,70 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 this.setState((state) => ({...state, result})),
             );
         } else {
-            const jsonWithLocations = yamlToJsonWithLocations(raw);
-            const result: Result = errs.map((lintError) => {
-                const {start, end} = lintError.location.reduce(
-                    (acc, key) => acc[key],
-                    jsonWithLocations,
-                )[locSymbol];
+            const parsed = yamlAstParser(raw, {});
+
+            const result = errs.map((lintError) => {
+                const loc = lintError.location.reduce((acc, el, index) => {
+                    if ('mappings' in acc) {
+                        const map = acc.mappings.find(
+                            (x: YAMLNode) => x.key.value === el,
+                        );
+
+                        const isLast = index === lintError.location.length - 1;
+                        const propName =
+                            isLast && KEY_POINTING_ERRORS.has(lintError.name)
+                                ? 'key'
+                                : 'value';
+
+                        return map[propName];
+                    }
+                    if (isYamlSequence(acc)) {
+                        return acc.items[Number(el)];
+                    }
+
+                    return acc;
+                }, parsed);
+
+                if (loc === undefined) {
+                    return {
+                        ...lintError,
+                        start: {
+                            line: 0,
+                            col: 0,
+                        },
+                        end: {
+                            line: 0,
+                            col: 0,
+                        },
+                    };
+                }
+
+                const subRaw = raw.slice(0, loc.endPosition);
+                const lines = subRaw.split('\n');
+
+                let lineIndex = lines.length - 1;
+                let startRow = 1;
+                let diff = loc.endPosition - loc.startPosition;
+                while (lineIndex) {
+                    const lineLength = lines[lineIndex].length;
+                    if (lineLength > diff) {
+                        startRow = lineLength - diff;
+                        break;
+                    } else {
+                        diff -= lineLength;
+                    }
+                    lineIndex--;
+                }
 
                 return {
                     ...lintError,
                     start: {
-                        line: start.line,
-                        col: start.column,
+                        line: lineIndex + 1,
+                        col: startRow + 1,
                     },
                     end: {
-                        line: end.line,
-                        col: end.column,
+                        line: lines.length,
+                        col: lines[lines.length - 1].length + 1,
                     },
                 };
             });
@@ -135,7 +191,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         }
 
         try {
-            const parsed = yaml.safeLoad(raw);
+            const parsed = yamlParser(raw);
             this.setState((oldState) => ({
                 ...oldState,
                 isValid: true,

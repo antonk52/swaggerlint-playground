@@ -32,12 +32,12 @@
         "js-yaml": "^3.14.0",
         "json-to-ast": "^2.1.0",
         "prettier": "^2.0.5",
-        "pseudo-yaml-ast": "^1.0.10",
         "react-ace": "^9.0.0",
         "react-dropzone": "^11.0.1",
         "react-modal": "^3.11.2",
         "swaggerlint": "0.0.7",
-        "typescript": "^3.9.2"
+        "typescript": "^3.9.2",
+        "yaml-ast-parser": "0.0.43"
     },
     "prettier": {
         "tabWidth": 4,
