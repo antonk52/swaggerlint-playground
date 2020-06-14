@@ -6,7 +6,7 @@ import {swaggerlint} from 'swaggerlint';
 import {Editor} from 'components/Editor';
 import jsonToAst from 'json-to-ast';
 import {prettify, defaultConfig} from 'utils';
-import {Result, Config, Mark, Format} from 'types';
+import {Result, Config, Mark, Format, Coord} from 'types';
 import AceEditor from 'react-ace';
 import yaml from 'js-yaml';
 import yamlToJsonWithLocations, {loc as locSymbol} from 'pseudo-yaml-ast';
@@ -170,74 +170,11 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         }
     };
 
-    onErrorClick = (location: string[], ruleName: string) => {
+    onErrorClick = (start: Coord, end: Coord) => {
         if (!this.editor.current) return;
 
-        let targetLine = 0;
-        const coords = {
-            startRow: 0,
-            startCol: 0,
-            endRow: 0,
-            endCol: 0,
-        };
-
-        if (this.state.format === 'json') {
-            const ast = jsonToAst(this.state.swaggerRaw, {loc: true});
-            const node = location.reduce((acc, key, index) => {
-                if (acc.type === 'Object') {
-                    const propName = isKeyPoiningLocation(
-                        ruleName,
-                        location.length,
-                        index,
-                    )
-                        ? 'key'
-                        : 'value';
-                    return acc.children.find((el) => el.key.value === key)?.[
-                        propName
-                    ];
-                }
-
-                if (acc.type === 'Array') {
-                    // @ts-expect-error
-                    return acc.children[key];
-                }
-
-                throw new Error(
-                    `Cannot retrieve ast node from node type "${acc.type}" with key "${key}"`,
-                );
-            }, ast);
-
-            const loc = node.loc as jsonToAst.Location;
-
-            const desiredLine = loc.start.line - 5;
-            targetLine = desiredLine > 0 ? desiredLine : loc.start.line;
-
-            Object.assign(coords, {
-                startRow: loc.start.line - 1,
-                startCol: loc.start.column - 1,
-                endRow: loc.end.line - 1,
-                endCol: loc.end.column - 1,
-            });
-        } else {
-            const jsonWithLocations = yamlToJsonWithLocations(
-                this.state.swaggerRaw,
-            );
-            const node = location.reduce(
-                (acc, key) => acc[key],
-                jsonWithLocations,
-            );
-
-            const loc = node[locSymbol];
-
-            const desiredLine = loc.start.line - 5;
-            targetLine = desiredLine > 0 ? desiredLine : loc.start.line;
-            Object.assign(coords, {
-                startRow: loc.start.line - 1,
-                startCol: loc.start.column,
-                endRow: loc.end.line - 1,
-                endCol: loc.end.column,
-            });
-        }
+        const desiredLine = start.line - 5;
+        const targetLine = desiredLine > 0 ? desiredLine : start.line;
 
         this.editor.current.editor.scrollToLine(
             targetLine,
@@ -262,7 +199,10 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                         ...state,
                         currentMark: [
                             {
-                                ...coords,
+                                startCol: start.col - 1,
+                                endCol: end.col - 1,
+                                startRow: start.line - 1,
+                                endRow: end.line - 1,
                                 className: 'highlighed-error-cause',
                                 type: 'text',
                             },

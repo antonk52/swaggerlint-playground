@@ -7,7 +7,7 @@ export type Config = Required<SwaggerlintConfig> & {
     ignore: Required<SwaggerlintConfig['ignore']>;
 };
 
-type Coord = {
+export type Coord = {
     col: number;
     line: number;
 };
