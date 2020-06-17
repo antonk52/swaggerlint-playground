@@ -11,6 +11,7 @@ export default function MyApp({Component, pageProps}) {
                     name="description"
                     content="Swaggerlint playground helps you to keep your API consistent. A linter for Swagger schemas."
                 />
+                <link rel="shortcut icon" href="/public/favicon.ico" />
             </Head>
             <Component {...pageProps} />
         </React.Fragment>
