@@ -26,7 +26,7 @@ type Props = {
     $ref: React.Ref<AceEditor>;
     errors: LintErrorWithCoords[];
     format: Format;
-    isValid: boolean;
+    isPrettierable: boolean;
     mark: Mark;
     onChange: (a: string) => void;
     onPrettify: () => void;
@@ -37,7 +37,7 @@ export function Editor({
     $ref,
     errors,
     format,
-    isValid,
+    isPrettierable,
     mark,
     onChange,
     onPrettify,
@@ -77,7 +77,7 @@ export function Editor({
                 >
                     <button
                         onClick={onPrettify}
-                        disabled={!isValid}
+                        disabled={!isPrettierable}
                         className={css.prettify}
                     >
                         prettify

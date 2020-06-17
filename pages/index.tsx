@@ -18,6 +18,7 @@ import {
 type State = {
     swaggerRaw: string;
     isValid: boolean;
+    isPrettierable: boolean;
     result: Result;
     config: Config;
     currentMark: Mark;
@@ -36,6 +37,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         this.state = {
             swaggerRaw: '',
             isValid: false,
+            isPrettierable: false,
             result: null,
             config: defaultConfig,
             currentMark: [],
@@ -173,6 +175,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 this.setState((oldState) => ({
                     ...oldState,
                     isValid: true,
+                    isPrettierable: true,
                     swaggerRaw: raw,
                     config: config,
                 }));
@@ -182,6 +185,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 this.setState((oldState) => ({
                     ...oldState,
                     isValid: false,
+                    isPrettierable: false,
                     result: null,
                     swaggerRaw: raw,
                     config: config,
@@ -195,6 +199,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
             this.setState((oldState) => ({
                 ...oldState,
                 isValid: true,
+                isPrettierable: false,
                 swaggerRaw: raw,
                 config: config,
             }));
@@ -204,6 +209,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
             this.setState((oldState) => ({
                 ...oldState,
                 isValid: false,
+                isPrettierable: false,
                 result: null,
                 swaggerRaw: raw,
                 config: config,
@@ -282,7 +288,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
     render() {
         const {
             swaggerRaw,
-            isValid,
+            isPrettierable,
             result,
             config,
             currentMark,
@@ -301,7 +307,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                     $ref={this.editor}
                     errors={result === null ? [] : result}
                     format={format}
-                    isValid={isValid}
+                    isPrettierable={isPrettierable}
                     mark={currentMark}
                     onChange={this.onChange}
                     onPrettify={this.onPrettify}
