@@ -35,7 +35,7 @@
         "react-ace": "^9.0.0",
         "react-dropzone": "^11.0.1",
         "react-modal": "^3.11.2",
-        "swaggerlint": "0.0.7",
+        "swaggerlint": "0.0.8",
         "typescript": "^3.9.5",
         "yaml-ast-parser": "0.0.43"
     },
