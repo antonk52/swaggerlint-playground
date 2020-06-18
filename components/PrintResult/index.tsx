@@ -1,5 +1,5 @@
 import React from 'react';
-import {Result} from 'types';
+import {Result, Coord} from 'types';
 import {ErrorItem} from '../ErrorItem';
 import css from './style.module.css';
 
@@ -12,7 +12,7 @@ export const PrintResult = ({
     onErrorClick,
 }: {
     result: Result;
-    onErrorClick: (arg: string[]) => void;
+    onErrorClick: (start: Coord, end: Coord) => void;
 }) => {
     if (result === null) {
         return <ResultWrapper />;
@@ -34,7 +34,7 @@ export const PrintResult = ({
                     <ErrorItem
                         key={i}
                         {...item}
-                        onButtonClick={() => onErrorClick(item.location)}
+                        onButtonClick={() => onErrorClick(item.start, item.end)}
                     />
                 ))}
             </ul>

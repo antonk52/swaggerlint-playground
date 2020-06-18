@@ -5,20 +5,29 @@ import {Header} from 'components/Header';
 import {swaggerlint} from 'swaggerlint';
 import {Editor} from 'components/Editor';
 import jsonToAst from 'json-to-ast';
-import {prettify, defaultConfig} from 'utils';
-import {Result, Config, Mark, Format} from 'types';
+import {prettify, defaultConfig, KEY_POINTING_ERRORS} from 'utils';
+import {Result, Config, Mark, Format, Coord} from 'types';
 import AceEditor from 'react-ace';
-import yaml from 'js-yaml';
-import yamlToJsonWithLocations, {loc as locSymbol} from 'pseudo-yaml-ast';
+import {safeLoad as yamlParser} from 'js-yaml';
+import {
+    safeLoad as yamlAstParser,
+    YAMLNode,
+    YAMLSequence,
+} from 'yaml-ast-parser';
 
 type State = {
     swaggerRaw: string;
     isValid: boolean;
+    isPrettierable: boolean;
     result: Result;
     config: Config;
     currentMark: Mark;
     format: Format;
 };
+
+function isYamlSequence(node: YAMLNode): node is YAMLSequence {
+    return 'items' in node;
+}
 
 export default class SwaggerlintPlayground extends React.Component<{}, State> {
     editor: React.RefObject<AceEditor>;
@@ -28,6 +37,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         this.state = {
             swaggerRaw: '',
             isValid: false,
+            isPrettierable: false,
             result: null,
             config: defaultConfig,
             currentMark: [],
@@ -42,10 +52,16 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         if (this.state.format === 'json') {
             const ast = jsonToAst(raw, {loc: true});
             const result: Result = errs.map((lintError) => {
-                const node = lintError.location.reduce((acc, key) => {
+                const node = lintError.location.reduce((acc, key, index) => {
                     if (acc.type === 'Object') {
-                        return acc.children.find((el) => el.key.value === key)
-                            ?.value;
+                        const isLast = index === lintError.location.length - 1;
+                        const propName =
+                            isLast && KEY_POINTING_ERRORS.has(lintError.name)
+                                ? 'key'
+                                : 'value';
+                        return acc.children.find(
+                            (el) => el.key.value === key,
+                        )?.[propName];
                     }
 
                     if (acc.type === 'Array') {
@@ -59,7 +75,9 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 }, ast);
 
                 const loc = node.loc as jsonToAst.Location;
-                const coords = {
+
+                return {
+                    ...lintError,
                     start: {
                         line: loc.start.line,
                         col: loc.start.column,
@@ -69,31 +87,78 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                         col: loc.end.column,
                     },
                 };
-
-                return Object.assign(lintError, coords);
             });
 
             requestAnimationFrame(() =>
                 this.setState((state) => ({...state, result})),
             );
         } else {
-            const jsonWithLocations = yamlToJsonWithLocations(raw);
-            const result: Result = errs.map((lintError) => {
-                const {location} = lintError;
+            const parsed = yamlAstParser(raw, {});
 
-                const coords = location.reduce((acc, key) => {
-                    return acc[key];
-                }, jsonWithLocations)[locSymbol];
-                return Object.assign(lintError, {
+            const result = errs.map((lintError) => {
+                const loc = lintError.location.reduce((acc, el, index) => {
+                    if ('mappings' in acc) {
+                        const map = acc.mappings.find(
+                            (x: YAMLNode) => x.key.value === el,
+                        );
+
+                        const isLast = index === lintError.location.length - 1;
+                        const propName =
+                            isLast && KEY_POINTING_ERRORS.has(lintError.name)
+                                ? 'key'
+                                : 'value';
+
+                        return map[propName];
+                    }
+                    if (isYamlSequence(acc)) {
+                        return acc.items[Number(el)];
+                    }
+
+                    return acc;
+                }, parsed);
+
+                if (loc === undefined) {
+                    return {
+                        ...lintError,
+                        start: {
+                            line: 0,
+                            col: 0,
+                        },
+                        end: {
+                            line: 0,
+                            col: 0,
+                        },
+                    };
+                }
+
+                const subRaw = raw.slice(0, loc.endPosition);
+                const lines = subRaw.split('\n');
+
+                let lineIndex = lines.length - 1;
+                let startRow = 1;
+                let diff = loc.endPosition - loc.startPosition;
+                while (lineIndex) {
+                    const lineLength = lines[lineIndex].length;
+                    if (lineLength > diff) {
+                        startRow = lineLength - diff;
+                        break;
+                    } else {
+                        diff -= lineLength;
+                    }
+                    lineIndex--;
+                }
+
+                return {
+                    ...lintError,
                     start: {
-                        line: coords.start.line,
-                        col: coords.start.column,
+                        line: lineIndex + 1,
+                        col: startRow + 1,
                     },
                     end: {
-                        line: coords.end.line,
-                        col: coords.end.column,
+                        line: lines.length,
+                        col: lines[lines.length - 1].length + 1,
                     },
-                });
+                };
             });
 
             requestAnimationFrame(() =>
@@ -110,6 +175,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 this.setState((oldState) => ({
                     ...oldState,
                     isValid: true,
+                    isPrettierable: true,
                     swaggerRaw: raw,
                     config: config,
                 }));
@@ -119,6 +185,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 this.setState((oldState) => ({
                     ...oldState,
                     isValid: false,
+                    isPrettierable: false,
                     result: null,
                     swaggerRaw: raw,
                     config: config,
@@ -128,10 +195,11 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         }
 
         try {
-            const parsed = yaml.safeLoad(raw);
+            const parsed = yamlParser(raw);
             this.setState((oldState) => ({
                 ...oldState,
                 isValid: true,
+                isPrettierable: false,
                 swaggerRaw: raw,
                 config: config,
             }));
@@ -141,6 +209,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
             this.setState((oldState) => ({
                 ...oldState,
                 isValid: false,
+                isPrettierable: false,
                 result: null,
                 swaggerRaw: raw,
                 config: config,
@@ -148,66 +217,11 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
         }
     };
 
-    onErrorClick = (location: string[]) => {
+    onErrorClick = (start: Coord, end: Coord) => {
         if (!this.editor.current) return;
 
-        let targetLine = 0;
-        const coords = {
-            startRow: 0,
-            startCol: 0,
-            endRow: 0,
-            endCol: 0,
-        };
-
-        if (this.state.format === 'json') {
-            const ast = jsonToAst(this.state.swaggerRaw, {loc: true});
-            const node = location.reduce((acc, key) => {
-                if (acc.type === 'Object') {
-                    return acc.children.find((el) => el.key.value === key)
-                        ?.value;
-                }
-
-                if (acc.type === 'Array') {
-                    // @ts-expect-error
-                    return acc.children[key];
-                }
-
-                throw new Error(
-                    `Cannot retrieve ast node from node type "${acc.type}" with key "${key}"`,
-                );
-            }, ast);
-
-            const loc = node.loc as jsonToAst.Location;
-
-            const desiredLine = loc.start.line - 5;
-            targetLine = desiredLine > 0 ? desiredLine : loc.start.line;
-
-            Object.assign(coords, {
-                startRow: loc.start.line - 1,
-                startCol: loc.start.column - 1,
-                endRow: loc.end.line - 1,
-                endCol: loc.end.column - 1,
-            });
-        } else {
-            const jsonWithLocations = yamlToJsonWithLocations(
-                this.state.swaggerRaw,
-            );
-            const node = location.reduce(
-                (acc, key) => acc[key],
-                jsonWithLocations,
-            );
-
-            const loc = node[locSymbol];
-
-            const desiredLine = loc.start.line - 5;
-            targetLine = desiredLine > 0 ? desiredLine : loc.start.line;
-            Object.assign(coords, {
-                startRow: loc.start.line - 1,
-                startCol: loc.start.column,
-                endRow: loc.end.line - 1,
-                endCol: loc.end.column,
-            });
-        }
+        const desiredLine = start.line - 5;
+        const targetLine = desiredLine > 0 ? desiredLine : start.line;
 
         this.editor.current.editor.scrollToLine(
             targetLine,
@@ -232,7 +246,10 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                         ...state,
                         currentMark: [
                             {
-                                ...coords,
+                                startCol: start.col - 1,
+                                endCol: end.col - 1,
+                                startRow: start.line - 1,
+                                endRow: end.line - 1,
                                 className: 'highlighed-error-cause',
                                 type: 'text',
                             },
@@ -271,7 +288,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
     render() {
         const {
             swaggerRaw,
-            isValid,
+            isPrettierable,
             result,
             config,
             currentMark,
@@ -290,7 +307,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                     $ref={this.editor}
                     errors={result === null ? [] : result}
                     format={format}
-                    isValid={isValid}
+                    isPrettierable={isPrettierable}
                     mark={currentMark}
                     onChange={this.onChange}
                     onPrettify={this.onPrettify}

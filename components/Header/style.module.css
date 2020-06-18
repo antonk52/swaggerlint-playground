@@ -12,14 +12,26 @@
     z-index: 4;
 }
 
-.star {
+.main {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+}
+
+.nameWrap {
     display: flex;
     flex-flow: row nowrap;
     align-items: baseline;
 }
 
+.icon {
+    margin-right: 0.5ch;
+}
+
 .name {
     margin: 0;
+    font-size: 28px;
+    font-weight: normal;
 }
 
 .version {
