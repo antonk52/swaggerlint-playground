@@ -1,8 +1,12 @@
 import React from 'react';
 import {Config} from 'types';
-import {Modal} from './Modal';
+import {Modal} from '../Modal';
+import {Button} from '../Button';
+import {Input} from '../Input';
 import {isBrowser} from 'utils';
 import copy from 'copy-to-clipboard';
+
+import css from './style.module.css';
 
 type Props = {
     config: Config;
@@ -19,14 +23,10 @@ function IgnoreInput({
     onRemove: () => void;
 }) {
     return (
-        <div>
-            <input
-                type="text"
-                value={value}
-                onChange={({target}) => onChange(target.value)}
-            />
-            <button onClick={onRemove}>remove me</button>
-        </div>
+        <li className={css.ignoreItem}>
+            <Input value={value} onChange={onChange} />
+            <Button onClick={onRemove}>remove</Button>
+        </li>
     );
 }
 
@@ -68,15 +68,12 @@ export const ConfigDialog = ({config, onChange}: Props) => {
 
     return (
         <React.Fragment>
-            <button
-                aria-label="edit swaggerlint config"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                Config ⚙️
-            </button>
+            <Button onClick={() => setIsOpen(!isOpen)} size="sm">
+                Config
+            </Button>
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <span>Tune the rules to your tastes</span>
-                <form>
+                <form className={css.form}>
                     <h2>Rules</h2>
                     <ul style={{listStyle: 'none', margin: 0}}>
                         {Object.entries(config.rules).map(([name, value]) => (
@@ -95,73 +92,67 @@ export const ConfigDialog = ({config, onChange}: Props) => {
                     </ul>
                     <h2>Ignore stuff</h2>
                     <h3>Paths</h3>
-                    <button
-                        type="button"
+                    <Button
                         onClick={() => {
                             const copy = copyConf(config);
                             copy.ignore.paths.push('');
                             onChange(copy);
                         }}
                     >
-                        ✚ add
-                    </button>
-                    <ul>
+                        ✚ Add
+                    </Button>
+                    <ul className={css.ignoreList}>
                         {config.ignore.paths.map((el, i) => (
-                            <li key={i}>
-                                <IgnoreInput
-                                    value={el}
-                                    onChange={(value) => {
-                                        const copy = copyConf(config);
-                                        copy.ignore.paths[i] = value;
-                                        onChange(copy);
-                                    }}
-                                    onRemove={() => {
-                                        const copy = copyConf(config);
-                                        copy.ignore.paths = copy.ignore.paths.filter(
-                                            (_, indx) => indx !== i,
-                                        );
-                                        onChange(copy);
-                                    }}
-                                />
-                            </li>
+                            <IgnoreInput
+                                key={i}
+                                value={el}
+                                onChange={(value) => {
+                                    const copy = copyConf(config);
+                                    copy.ignore.paths[i] = value;
+                                    onChange(copy);
+                                }}
+                                onRemove={() => {
+                                    const copy = copyConf(config);
+                                    copy.ignore.paths = copy.ignore.paths.filter(
+                                        (_, indx) => indx !== i,
+                                    );
+                                    onChange(copy);
+                                }}
+                            />
                         ))}
                     </ul>
                     <h3>Definitions</h3>
-                    <button
-                        type="button"
+                    <Button
                         onClick={() => {
                             const copy = copyConf(config);
                             copy.ignore.definitions.push('');
                             onChange(copy);
                         }}
                     >
-                        ✚ add
-                    </button>
-                    <ul>
+                        ✚ Add
+                    </Button>
+                    <ul className={css.ignoreList}>
                         {config.ignore.definitions.map((el, i) => (
-                            <li key={i}>
-                                <IgnoreInput
-                                    value={el}
-                                    onChange={(value) => {
-                                        const copy = copyConf(config);
-                                        copy.ignore.definitions[i] = value;
-                                        onChange(copy);
-                                    }}
-                                    onRemove={() => {
-                                        const copy = copyConf(config);
-                                        copy.ignore.definitions = copy.ignore.definitions.filter(
-                                            (_, indx) => indx !== i,
-                                        );
-                                        onChange(copy);
-                                    }}
-                                />
-                            </li>
+                            <IgnoreInput
+                                key={i}
+                                value={el}
+                                onChange={(value) => {
+                                    const copy = copyConf(config);
+                                    copy.ignore.definitions[i] = value;
+                                    onChange(copy);
+                                }}
+                                onRemove={() => {
+                                    const copy = copyConf(config);
+                                    copy.ignore.definitions = copy.ignore.definitions.filter(
+                                        (_, indx) => indx !== i,
+                                    );
+                                    onChange(copy);
+                                }}
+                            />
                         ))}
                     </ul>
                 </form>
-                <button type="button" onClick={clipboardConfig}>
-                    Copy as JSON
-                </button>
+                <Button onClick={clipboardConfig}>Copy as JSON</Button>
             </Modal>
         </React.Fragment>
     );

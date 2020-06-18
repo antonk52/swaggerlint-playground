@@ -1,0 +1,32 @@
+.form {
+    padding: 0;
+    margin: 0 0 8px 0;
+    border: 0 solid rgba(27, 31, 35, 0.15);
+    border-bottom-width: 1px;
+}
+.ignoreList {
+    padding: 0;
+}
+
+.ignoreItem {
+    display: flex;
+    position: relative;
+    margin: 0 0 0 20px;
+}
+
+.ignoreItem:before {
+    position: absolute;
+    content: '∙';
+    display: inline-flex;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    left: -16px;
+}
+.ignoreItem > * + * {
+    margin-left: 8px;
+}
+
+.ignoreItem + .ignoreItem {
+    margin-top: 12px;
+}
