@@ -4,7 +4,7 @@
     right: 0px;
     bottom: 0px;
     left: 0px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--color-overlay);
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -18,7 +18,7 @@
 
 .content {
     border: 0;
-    background: #eee;
+    background: var(--color-white);
     overflow: auto;
     border-radius: 4px;
     outline: currentcolor none medium;
@@ -36,22 +36,22 @@
     top: 0;
     right: 0;
 
-    border: 2px solid #49cc90;
+    border: 2px solid var(--color-accent);
     border-radius: 50%;
     width: 30px;
     height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(73, 204, 144, 0);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0);
+    background: transparent;
+    box-shadow: 0 0 5px transparent;
     transition: background 0.3s, box-shadow 0.3s;
     font-weight: bold;
 }
 
 .button:hover {
-    background: rgba(73, 204, 144, 1);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    background: var(--color-accent);
+    box-shadow: 0 0 5px var(--color-shadow);
     cursor: pointer;
 }
 

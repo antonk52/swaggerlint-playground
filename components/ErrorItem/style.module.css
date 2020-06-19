@@ -5,7 +5,7 @@
     justify-content: space-between;
     align-items: center;
 
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--color-border);
 }
 
 .listItem + .listItem {
@@ -30,19 +30,20 @@
     margin: 0 0 0 8px;
 
     background: none;
-    border-color: #49cc90;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0);
+    border-color: var(--color-accent-faded);
+    box-shadow: 0 0 5px transparent;
 
     transition: all 0.3s;
 }
 
+.btn:hover:focus,
 .btn:focus {
-    background: #85ea2d;
-    border-color: #85ea2d;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 .btn:hover {
     background: none;
     cursor: pointer;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 5px var(--color-shadow);
 }

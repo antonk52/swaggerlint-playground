@@ -5,11 +5,12 @@
 
 .total {
     padding: 0 16px;
-    fontsize: 1.4em;
+    font-size: 15px;
+    line-height: 20px;
 }
 
 .list {
-    liststyle: none;
+    list-style: none;
     margin: 0;
     padding: 0;
 }
