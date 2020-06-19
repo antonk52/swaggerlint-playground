@@ -6,14 +6,15 @@ import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
 import Dropzone from 'react-dropzone';
 
+import {Button} from '../Button';
+
 import css from './style.module.css';
 
 import {Ace} from 'ace-builds';
 
 import {LintErrorWithCoords, Mark, Format} from 'types';
 
-function errToAnnotaion(lintError: LintErrorWithCoords): Ace.Annotation {
-    const {start, msg} = lintError;
+function errToAnnotaion({start, msg}: LintErrorWithCoords): Ace.Annotation {
     return {
         row: start.line - 1,
         column: start.col,
@@ -75,13 +76,14 @@ export function Editor({
                         isDragActive ? css.dropzoneOverlayed : '',
                     ].join(' ')}
                 >
-                    <button
+                    <Button
                         onClick={onPrettify}
                         disabled={!isPrettierable}
                         className={css.prettify}
+                        size="sm"
                     >
-                        prettify
-                    </button>
+                        Prettify
+                    </Button>
                     <input {...getInputProps()} />
 
                     <label>

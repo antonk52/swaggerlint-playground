@@ -1,5 +1,7 @@
 import React from 'react';
 import {LintErrorWithCoords} from 'types';
+
+import {Button} from '../Button';
 import css from './style.module.css';
 
 export const ErrorItem = ({
@@ -19,8 +21,8 @@ export const ErrorItem = ({
             </span>
             {location.length > 0 ? <span>in {location.join('.')}</span> : null}
         </div>
-        <button type="button" onClick={onButtonClick} className={css.btn}>
+        <Button onClick={onButtonClick} className={css.btn} size="lg">
             Go to error
-        </button>
+        </Button>
     </li>
 );

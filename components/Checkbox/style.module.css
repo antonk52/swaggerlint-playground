@@ -1,0 +1,15 @@
+.label {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+
+    cursor: pointer;
+}
+
+.text {
+    /**
+     * pull text up,
+     * since no upper case letters are used to get it visually centered
+     */
+    margin: -4px 0 0 6px;
+}

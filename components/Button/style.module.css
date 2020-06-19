@@ -1,0 +1,34 @@
+.btn {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 20px;
+    white-space: nowrap;
+    cursor: pointer;
+
+    color: var(--color-black);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+}
+
+.btn:hover {
+    background: var(--color-btn-hover-bg);
+}
+
+.size_sm {
+    padding: 2px 12px;
+}
+
+.size_md {
+    padding: 4px 16px;
+}
+
+.size_lg {
+    padding: 6px 20px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    border-width: 2px;
+    border-radius: 4px;
+}

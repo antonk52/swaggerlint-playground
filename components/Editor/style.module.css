@@ -14,30 +14,18 @@
     right: 4px;
     z-index: 3;
 
-    display: block;
-    padding: 2px 6px;
-    font-size: 12px;
-    border-radius: 4px;
-    border: 0;
-    background: #eee;
-    color: #333;
     transform: translateY(0);
     opacity: 1;
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
 
 .prettify[disabled] {
-    color: #888;
     opacity: 0.5;
     /**
      * hides the button underneath the header
      * -120% since the funky behavior in safari
      */
     transform: translateY(calc(-120% - 4px));
-}
-
-.prettify:hover {
-    cursor: pointer;
 }
 
 .dropzone {
@@ -53,9 +41,9 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--color-overlay);
     z-index: 1000000;
-    color: #eee;
+    color: var(--color-white);
     justify-content: space-around;
     align-items: center;
 
@@ -68,5 +56,4 @@
 .editorLabel {
     position: absolute;
     left: -200vw;
-    color: #fff;
 }
