@@ -1,5 +1,21 @@
 html {
     height: 100%;
+
+    --color-border: rgba(27, 31, 35, 0.15);
+    --color-accent: #85ea2d;
+    --color-accent-faded: #49cc90;
+
+    --color-shadow: rgba(0, 0, 0, 0.3);
+    --color-overlay: rgba(0, 0, 0, 0.5);
+
+    --color-white: #fafbfc;
+
+    --color-btn-hover-bg: #f3f4f6;
+
+    --color-placeholder: #dcdcdc;
+
+    --color-grey: #999;
+    --color-black: #1b1b1b;
 }
 
 body {
@@ -49,5 +65,5 @@ body {
  * in order to set the color for the placeholder text
  */
 .ace_placeholder.ace_placeholder {
-    color: #dcdcdc;
+    color: var(--color-placeholder);
 }

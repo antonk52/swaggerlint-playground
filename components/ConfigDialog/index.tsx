@@ -2,6 +2,7 @@ import React from 'react';
 import {Config} from 'types';
 import {Modal} from '../Modal';
 import {Button} from '../Button';
+import {Checkbox} from '../Checkbox';
 import {Input} from '../Input';
 import {isBrowser} from 'utils';
 import copy from 'copy-to-clipboard';
@@ -17,16 +18,42 @@ function IgnoreInput({
     value,
     onChange,
     onRemove,
+    placeholder,
 }: {
     value: string;
     onChange: (value: string) => void;
     onRemove: () => void;
+    placeholder: string;
 }) {
     return (
         <li className={css.ignoreItem}>
-            <Input value={value} onChange={onChange} />
+            <Input
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+            />
             <Button onClick={onRemove}>remove</Button>
         </li>
+    );
+}
+
+function Fieldset({
+    title,
+    onAdd,
+    children,
+}: {
+    title: string;
+    onAdd: () => void;
+    children: React.ReactNode;
+}) {
+    return (
+        <fieldset className={css.fieldset}>
+            <div className={css.subHeadRow}>
+                <h3>{title}</h3>
+                <Button onClick={onAdd}>✚ Add</Button>
+            </div>
+            <ul className={css.list}>{children}</ul>
+        </fieldset>
     );
 }
 
@@ -46,24 +73,50 @@ function copyConf(config: Config): Config {
 
 export const ConfigDialog = ({config, onChange}: Props) => {
     const [isOpen, setIsOpen] = React.useState(false);
-    const onCheckboxChange = ({
-        target,
-    }: React.ChangeEvent<HTMLInputElement>) => {
-        onChange({
-            ...config,
-            rules: {
-                ...config.rules,
-                [target.name]: target.checked,
-            },
-        });
-    };
+    const onCheckboxChange = React.useCallback(
+        ({target}: React.ChangeEvent<HTMLInputElement>) => {
+            const copy = copyConf(config);
+            copy.rules[target.name] = target.checked;
+            onChange(copy);
+        },
+        [config.rules],
+    );
 
-    const clipboardConfig = () => {
+    const clipboardConfig = React.useCallback(() => {
         if (!isBrowser) return;
-        console.log('trying to copy i guess');
         const jsonConfig = stringifyConfig(config);
 
         copy(jsonConfig);
+    }, [config]);
+
+    const onAddIgnorePath = React.useCallback(() => {
+        const copy = copyConf(config);
+        copy.ignore.paths.push('');
+        onChange(copy);
+    }, [config.ignore.paths]);
+
+    const onAddIgnoreDefinition = React.useCallback(() => {
+        const copy = copyConf(config);
+        copy.ignore.definitions.push('');
+        onChange(copy);
+    }, [config.ignore.definitions]);
+
+    const getIgnoreChangeFunc = (
+        i: number,
+        propName: 'definitions' | 'paths',
+    ) => (value: string) => {
+        const copy = copyConf(config);
+        copy.ignore[propName][i] = value;
+        onChange(copy);
+    };
+
+    const getIgnoreRemoveFunc = (
+        i: number,
+        propName: 'definitions' | 'paths',
+    ) => () => {
+        const copy = copyConf(config);
+        copy.ignore[propName].splice(i, 1);
+        onChange(copy);
     };
 
     return (
@@ -75,82 +128,40 @@ export const ConfigDialog = ({config, onChange}: Props) => {
                 <span>Tune the rules to your tastes</span>
                 <form className={css.form}>
                     <h2>Rules</h2>
-                    <ul style={{listStyle: 'none', margin: 0}}>
+                    <ul className={css.list}>
                         {Object.entries(config.rules).map(([name, value]) => (
                             <li key={name}>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        name={name}
-                                        checked={!(value === false)}
-                                        onChange={onCheckboxChange}
-                                    />
-                                    {name}
-                                </label>
+                                <Checkbox
+                                    label={name}
+                                    checked={!(value === false)}
+                                    onChange={onCheckboxChange}
+                                />
                             </li>
                         ))}
                     </ul>
                     <h2>Ignore stuff</h2>
-                    <h3>Paths</h3>
-                    <Button
-                        onClick={() => {
-                            const copy = copyConf(config);
-                            copy.ignore.paths.push('');
-                            onChange(copy);
-                        }}
-                    >
-                        ✚ Add
-                    </Button>
-                    <ul className={css.ignoreList}>
+                    <Fieldset title="Paths" onAdd={onAddIgnorePath}>
                         {config.ignore.paths.map((el, i) => (
                             <IgnoreInput
                                 key={i}
                                 value={el}
-                                onChange={(value) => {
-                                    const copy = copyConf(config);
-                                    copy.ignore.paths[i] = value;
-                                    onChange(copy);
-                                }}
-                                onRemove={() => {
-                                    const copy = copyConf(config);
-                                    copy.ignore.paths = copy.ignore.paths.filter(
-                                        (_, indx) => indx !== i,
-                                    );
-                                    onChange(copy);
-                                }}
+                                onChange={getIgnoreChangeFunc(i, 'paths')}
+                                onRemove={getIgnoreRemoveFunc(i, 'paths')}
+                                placeholder="/path/to/ignore"
                             />
                         ))}
-                    </ul>
-                    <h3>Definitions</h3>
-                    <Button
-                        onClick={() => {
-                            const copy = copyConf(config);
-                            copy.ignore.definitions.push('');
-                            onChange(copy);
-                        }}
-                    >
-                        ✚ Add
-                    </Button>
-                    <ul className={css.ignoreList}>
+                    </Fieldset>
+                    <Fieldset title="Definitions" onAdd={onAddIgnoreDefinition}>
                         {config.ignore.definitions.map((el, i) => (
                             <IgnoreInput
                                 key={i}
                                 value={el}
-                                onChange={(value) => {
-                                    const copy = copyConf(config);
-                                    copy.ignore.definitions[i] = value;
-                                    onChange(copy);
-                                }}
-                                onRemove={() => {
-                                    const copy = copyConf(config);
-                                    copy.ignore.definitions = copy.ignore.definitions.filter(
-                                        (_, indx) => indx !== i,
-                                    );
-                                    onChange(copy);
-                                }}
+                                onChange={getIgnoreChangeFunc(i, 'definitions')}
+                                onRemove={getIgnoreRemoveFunc(i, 'definitions')}
+                                placeholder="DefinitionToIgnore"
                             />
                         ))}
-                    </ul>
+                    </Fieldset>
                 </form>
                 <Button onClick={clipboardConfig}>Copy as JSON</Button>
             </Modal>

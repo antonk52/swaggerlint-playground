@@ -1,32 +1,50 @@
 .form {
     padding: 0;
     margin: 0 0 8px 0;
-    border: 0 solid rgba(27, 31, 35, 0.15);
+    border: 0 solid var(--color-border);
     border-bottom-width: 1px;
 }
-.ignoreList {
+
+.fieldset {
     padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+.fieldset + .fieldset {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+}
+
+.subHeadRow {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subHeadRow > h3 {
+    margin: 0;
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+}
+
+.list > li + li {
+    margin-top: 8px;
 }
 
 .ignoreItem {
     display: flex;
+    align-items: center;
     position: relative;
-    margin: 0 0 0 20px;
+    margin: 0;
 }
 
-.ignoreItem:before {
-    position: absolute;
-    content: '∙';
-    display: inline-flex;
-    top: 0;
-    bottom: 0;
-    align-items: center;
-    left: -16px;
-}
 .ignoreItem > * + * {
     margin-left: 8px;
-}
-
-.ignoreItem + .ignoreItem {
-    margin-top: 12px;
 }
