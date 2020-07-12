@@ -252,6 +252,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                                 endRow: end.line - 1,
                                 className: 'highlighed-error-cause',
                                 type: 'text',
+                                inFront: true,
                             },
                         ],
                     })),
