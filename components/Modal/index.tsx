@@ -5,7 +5,9 @@ import {isBrowser} from 'utils';
 import css from './style.module.css';
 
 // @ts-expect-error
-const app: HtmlElement | false = isBrowser && document.querySelector('#__next');
+const app: HTMLElement | undefined = isBrowser
+    ? document.querySelector('#__next')
+    : undefined;
 
 type Props = {
     children: React.ReactNode;

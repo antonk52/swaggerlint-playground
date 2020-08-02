@@ -131,19 +131,24 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                     };
                 }
 
-                const subRaw = raw.slice(0, loc.endPosition);
+                // string from schema beginning to error end
+                const subRaw = raw
+                    .slice(0, loc.endPosition)
+                    .trimEnd()
+                    .replace(/\\n$/, '');
+                console.log({lintError, loc, subRaw});
                 const lines = subRaw.split('\n');
 
                 let lineIndex = lines.length - 1;
                 let startRow = 1;
-                let diff = loc.endPosition - loc.startPosition;
+                let diff = subRaw.length - 1 - loc.startPosition;
                 while (lineIndex) {
                     const lineLength = lines[lineIndex].length;
                     if (lineLength > diff) {
                         startRow = lineLength - diff;
                         break;
                     } else {
-                        diff -= lineLength;
+                        diff -= lineLength + 1;
                     }
                     lineIndex--;
                 }
@@ -152,7 +157,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                     ...lintError,
                     start: {
                         line: lineIndex + 1,
-                        col: startRow + 1,
+                        col: startRow,
                     },
                     end: {
                         line: lines.length,
@@ -252,6 +257,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                                 endRow: end.line - 1,
                                 className: 'highlighed-error-cause',
                                 type: 'text',
+                                inFront: true,
                             },
                         ],
                     })),
