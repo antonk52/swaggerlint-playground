@@ -1,11 +1,27 @@
-import {LintError, SwaggerlintConfig} from 'swaggerlint';
+import {LintError, SwaggerlintConfig, ConfigIgnore} from 'swaggerlint';
 import {IMarker} from 'react-ace';
 
 export type Format = 'json' | 'yaml';
 
-export type Config = Required<SwaggerlintConfig> & {
-    ignore: Required<SwaggerlintConfig['ignore']>;
-};
+interface Ignore extends Required<ConfigIgnore> {
+    components: {
+        schemas: string[];
+        responses: string[];
+        parameters: string[];
+        examples: string[];
+        requestBodies: string[];
+        headers: string[];
+        securitySchemes: string[];
+        links: string[];
+        callbacks: string[];
+    };
+}
+
+export type OpenAPIComponentsKeys = keyof Ignore['components'];
+
+export interface Config extends Required<SwaggerlintConfig> {
+    ignore: Ignore;
+}
 
 export type Coord = {
     col: number;

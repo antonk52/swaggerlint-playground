@@ -1,10 +1,10 @@
 import React from 'react';
-import {Config} from 'types';
+import {Config, OpenAPIComponentsKeys} from 'types';
 import {Modal} from '../Modal';
 import {Button} from '../Button';
 import {Checkbox} from '../Checkbox';
 import {Input} from '../Input';
-import {isBrowser} from 'utils';
+import {isBrowser, componentsKeys} from 'utils';
 import copy from 'copy-to-clipboard';
 
 import css from './style.module.css';
@@ -39,17 +39,26 @@ function IgnoreInput({
 
 function Fieldset({
     title,
+    comment,
+    version,
     onAdd,
     children,
 }: {
     title: string;
     onAdd: () => void;
     children: React.ReactNode;
+    comment?: string;
+    version?: string;
 }) {
     return (
         <fieldset className={css.fieldset}>
             <div className={css.subHeadRow}>
-                <h3>{title}</h3>
+                <div className={css.fieldsetName}>
+                    <h3>{title}</h3>
+                    {comment && version && (
+                        <small title={comment}>{version} only</small>
+                    )}
+                </div>
                 <Button onClick={onAdd}>✚ Add</Button>
             </div>
             <ul className={css.list}>{children}</ul>
@@ -67,6 +76,9 @@ function copyConf(config: Config): Config {
         ignore: {
             paths: [...config.ignore.paths],
             definitions: [...config.ignore.definitions],
+            components: {
+                ...config.ignore.components,
+            },
         },
     };
 }
@@ -89,6 +101,19 @@ export const ConfigDialog = ({config, onChange}: Props) => {
         copy(jsonConfig);
     }, [config]);
 
+    const onAddIgnoreSomething = React.useCallback(
+        (path: ArrayPath) => () => {
+            const copy = copyConf(config);
+            if (path.length === 1) {
+                copy.ignore[path[0]].push('');
+            } else {
+                copy.ignore[path[0]][path[1]].push('');
+            }
+            onChange(copy);
+        },
+        [config.ignore],
+    );
+
     const onAddIgnorePath = React.useCallback(() => {
         const copy = copyConf(config);
         copy.ignore.paths.push('');
@@ -101,21 +126,31 @@ export const ConfigDialog = ({config, onChange}: Props) => {
         onChange(copy);
     }, [config.ignore.definitions]);
 
-    const getIgnoreChangeFunc = (
-        i: number,
-        propName: 'definitions' | 'paths',
-    ) => (value: string) => {
+    type ArrayPath =
+        | ['definitions']
+        | ['paths']
+        | ['components', OpenAPIComponentsKeys];
+
+    const getIgnoreChangeFunc = (i: number, path: ArrayPath) => (
+        value: string,
+    ) => {
         const copy = copyConf(config);
-        copy.ignore[propName][i] = value;
+
+        if (path.length === 1) {
+            copy.ignore[path[0]][i] = value;
+        } else {
+            copy.ignore[path[0]][path[1]][i] = value;
+        }
         onChange(copy);
     };
 
-    const getIgnoreRemoveFunc = (
-        i: number,
-        propName: 'definitions' | 'paths',
-    ) => () => {
+    const getIgnoreRemoveFunc = (i: number, path: ArrayPath) => () => {
         const copy = copyConf(config);
-        copy.ignore[propName].splice(i, 1);
+        if (path.length === 1) {
+            copy.ignore[path[0]].splice(i, 1);
+        } else {
+            copy.ignore[path[0]][path[1]].splice(i, 1);
+        }
         onChange(copy);
     };
 
@@ -145,23 +180,69 @@ export const ConfigDialog = ({config, onChange}: Props) => {
                             <IgnoreInput
                                 key={i}
                                 value={el}
-                                onChange={getIgnoreChangeFunc(i, 'paths')}
-                                onRemove={getIgnoreRemoveFunc(i, 'paths')}
+                                onChange={getIgnoreChangeFunc(i, ['paths'])}
+                                onRemove={getIgnoreRemoveFunc(i, ['paths'])}
                                 placeholder="/path/to/ignore"
                             />
                         ))}
                     </Fieldset>
-                    <Fieldset title="Definitions" onAdd={onAddIgnoreDefinition}>
+                    <Fieldset
+                        title="Definitions"
+                        onAdd={onAddIgnoreDefinition}
+                        comment="Swagger v2 specific"
+                        version="v2"
+                    >
                         {config.ignore.definitions.map((el, i) => (
                             <IgnoreInput
                                 key={i}
                                 value={el}
-                                onChange={getIgnoreChangeFunc(i, 'definitions')}
-                                onRemove={getIgnoreRemoveFunc(i, 'definitions')}
+                                onChange={getIgnoreChangeFunc(i, [
+                                    'definitions',
+                                ])}
+                                onRemove={getIgnoreRemoveFunc(i, [
+                                    'definitions',
+                                ])}
                                 placeholder="DefinitionToIgnore"
                             />
                         ))}
                     </Fieldset>
+                    {componentsKeys.map((compName) => {
+                        const {components} = config.ignore;
+                        const comp = components[compName];
+                        const placeholder = `${compName.replace(
+                            /s$/,
+                            '',
+                        )}ToIgnore`;
+
+                        return (
+                            <Fieldset
+                                title={compName}
+                                onAdd={onAddIgnoreSomething([
+                                    'components',
+                                    compName,
+                                ])}
+                                comment="OpenAPI v3 specific"
+                                version="v3"
+                                key={compName}
+                            >
+                                {comp.map((el, i) => (
+                                    <IgnoreInput
+                                        key={i}
+                                        value={el}
+                                        onChange={getIgnoreChangeFunc(i, [
+                                            'components',
+                                            compName,
+                                        ])}
+                                        onRemove={getIgnoreRemoveFunc(i, [
+                                            'components',
+                                            compName,
+                                        ])}
+                                        placeholder={placeholder}
+                                    />
+                                ))}
+                            </Fieldset>
+                        );
+                    })}
                 </form>
                 <Button onClick={clipboardConfig}>Copy as JSON</Button>
             </Modal>

@@ -1,20 +1,18 @@
 .form {
     padding: 0;
     margin: 0 0 8px 0;
-    border: 0 solid var(--color-border);
-    border-bottom-width: 1px;
 }
 
 .fieldset {
-    padding: 0;
-    margin: 0;
+    padding: 0 0 8px 0;
+    margin: 0 0 8px 0;
     border: 0;
+    border-bottom: 1px solid var(--color-border);
 }
 
-.fieldset + .fieldset {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--color-border);
+.fieldsetName {
+    display: flex;
+    align-items: baseline;
 }
 
 .subHeadRow {
@@ -24,8 +22,15 @@
     align-items: center;
 }
 
-.subHeadRow > h3 {
+.subHeadRow h3 {
     margin: 0;
+}
+
+.subHeadRow small {
+    margin: 0 0 0 0.5ch;
+    font-weight: bold;
+    font-size: 11px;
+    color: var(--color-grey);
 }
 
 .list {
@@ -34,7 +39,7 @@
     margin: 8px 0 0;
 }
 
-.list > li + li {
+.list > li {
     margin-top: 8px;
 }
 
