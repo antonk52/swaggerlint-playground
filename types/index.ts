@@ -1,4 +1,5 @@
-import {LintError, SwaggerlintConfig, ConfigIgnore} from 'swaggerlint';
+import {LintError, SwaggerlintConfig} from 'swaggerlint';
+import {ConfigIgnore} from 'swaggerlint/dist/types/swaggerlint';
 import {IMarker} from 'react-ace';
 
 export type Format = 'json' | 'yaml';
@@ -19,7 +20,7 @@ interface Ignore extends Required<ConfigIgnore> {
 
 export type OpenAPIComponentsKeys = keyof Ignore['components'];
 
-export interface Config extends Required<SwaggerlintConfig> {
+export interface Config extends Omit<Required<SwaggerlintConfig>, 'ignore'> {
     ignore: Ignore;
 }
 
