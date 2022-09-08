@@ -24,7 +24,7 @@ function errToAnnotaion({start, msg}: LintErrorWithCoords): Ace.Annotation {
 }
 
 type Props = {
-    $ref: React.Ref<AceEditor>;
+    // $ref: React.Ref<AceEditor>;
     errors: LintErrorWithCoords[];
     format: Format;
     isPrettierable: boolean;
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export function Editor({
-    $ref,
+    // $ref,
     errors,
     format,
     isPrettierable,
