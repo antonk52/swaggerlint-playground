@@ -1,8 +1,8 @@
 import React from 'react';
-import AceEditor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-json';
-import 'ace-builds/src-noconflict/mode-yaml';
-import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
+// import AceEditor from 'react-ace';
+// import 'ace-builds/src-noconflict/mode-json';
+// import 'ace-builds/src-noconflict/mode-yaml';
+// import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 
 import Dropzone from 'react-dropzone';
 
@@ -90,7 +90,7 @@ export function Editor({
                         <span className={css.editorLabel}>
                             Swaggerlint playground editor
                         </span>
-                        <AceEditor
+                        {/* <AceEditor
                             placeholder="Paste or drop a file with your schema here"
                             width="100%"
                             height="100%"
@@ -105,7 +105,7 @@ export function Editor({
                             }
                             ref={$ref}
                             markers={mark}
-                        />
+                        /> */}
                     </label>
                 </div>
             )}
