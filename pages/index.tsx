@@ -10,7 +10,7 @@ import {Result, Config, Mark, Format, Coord} from 'types';
 import AceEditor from 'react-ace';
 import {safeLoad as yamlParser} from 'js-yaml';
 import {
-    safeLoad as yamlAstParser,
+    load as yamlAstParser,
     YAMLNode,
     YAMLSequence,
 } from 'yaml-ast-parser';
@@ -209,7 +209,7 @@ export default class SwaggerlintPlayground extends React.Component<{}, State> {
                 config: config,
             }));
 
-            this.onValidChange(parsed, raw);
+//             this.onValidChange(parsed, raw);
         } catch (e) {
             this.setState((oldState) => ({
                 ...oldState,
