@@ -65,7 +65,7 @@ export function Editor({
             onDrop={onDrop}
             multiple={false}
             noClick
-<!--             accept={['application/json', '.yaml', '.yml']} -->
+            accept={['application/json', '.yaml', '.yml']}
         >
             {({getRootProps, getInputProps, isDragActive}) => (
                 <div
